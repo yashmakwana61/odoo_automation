@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================================================================
+         Invoice form: header sync buttons and traceability fields
+         ================================================================ -->
+    <record id="view_move_form_tally" model="ir.ui.view">
+        <field name="name">account.move.form.tally</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Header buttons -->
+            <xpath expr="//form/header" position="inside">
+                <button name="action_sync_to_tally"
+                        type="object"
+                        string="Sync to Tally"
+                        class="btn-secondary"
+                        icon="fa-refresh"
+                        groups="account.group_account_invoice,account.group_account_readonly"
+                        invisible="move_type != 'out_invoice' or state != 'posted' or tally_sync_status in ('synced', 'syncing', 'sync_unknown')"
+                        confirm="Sync this invoice to Tally now?"/>
+                <button name="action_check_readiness"
+                        type="object"
+                        string="Check Readiness"
+                        class="btn-secondary"
+                        icon="fa-check-circle"
+                        groups="account.group_account_invoice,account.group_account_readonly"
+                        invisible="move_type != 'out_invoice' or state != 'posted' or tally_sync_status == 'synced'"/>
+                <button name="action_preview_tally_invoice_wizard"
+                        type="object"
+                        string="Preview Tally Invoice"
+                        class="btn-secondary"
+                        icon="fa-eye"
+                        groups="account.group_account_invoice,account.group_account_readonly"
+                        invisible="move_type != 'out_invoice' or state != 'posted'"/>
+                <button name="action_reset_sync_unknown"
+                        type="object"
+                        string="Reset Sync Unknown"
+                        class="btn-warning"
+                        icon="fa-exclamation-triangle"
+                        groups="account.group_account_manager"
+                        invisible="tally_sync_status != 'sync_unknown'"
+                        confirm="Have you verified in Tally that this voucher does NOT exist? This will allow retry."/>
+            </xpath>
+
+            <!-- Smart button showing sync status -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_sync_to_tally"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-exchange"
+                        groups="account.group_account_invoice,account.group_account_readonly"
+                        invisible="move_type != 'out_invoice'">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Tally Sync</span>
+                        <span class="o_stat_value">
+                            <field name="tally_sync_status"/>
+                        </span>
+                    </div>
+                </button>
+            </xpath>
+
+            <!-- Traceability fields -->
+            <xpath expr="//field[@name='line_ids']" position="before">
+                <group name="tally_sync" string="Tally Sync"
+                       groups="account.group_account_invoice,account.group_account_readonly"
+                       invisible="move_type != 'out_invoice'">
+                    <field name="tally_sync_status" readonly="1"/>
+                    <field name="tally_voucher_id" readonly="1"/>
+                    <field name="tally_voucher_guid" readonly="1"/>
+                    <field name="tally_last_sync_date" readonly="1"/>
+                    <field name="tally_sync_count" readonly="1"/>
+                    <field name="tally_sync_duration" readonly="1"/>
+                    <field name="tally_next_retry" readonly="1" invisible="tally_sync_status not in ('retrying','failed')"/>
+                    <field name="tally_sync_unknown_reason" readonly="1"
+                           invisible="tally_sync_status != 'sync_unknown'"/>
+                    <field name="tally_error_message" readonly="1"
+                           invisible="tally_sync_status not in ('failed', 'rejected','retrying','sync_unknown')"/>
+                    <field name="tally_validation_result" readonly="1" nolabel="1"
+                           invisible="tally_sync_status not in ('not_ready', 'failed','retrying')"
+                           placeholder="Validation results will appear here..."/>
+                    <field name="tally_response" readonly="1" nolabel="1"
+                           invisible="tally_sync_status not in ('synced', 'failed', 'rejected','sync_unknown')"/>
+                    <field name="tally_request_hash" readonly="1" invisible="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         Invoice list: sync status column
+         ================================================================ -->
+    <record id="view_invoice_tree_tally" model="ir.ui.view">
+        <field name="name">account.move.tree.tally</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_invoice_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list/field[@name='amount_total_in_currency_signed']" position="after">
+                <field name="tally_sync_status" string="Tally Sync" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         Invoice search: filter by sync status + quick filters
+         ================================================================ -->
+    <record id="view_invoice_search_tally" model="ir.ui.view">
+        <field name="name">account.move.search.tally</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <field name="tally_sync_status" string="Tally Sync Status"/>
+                <separator/>
+                <filter string="Tally Not Ready" name="tally_not_ready"
+                        domain="[('tally_sync_status', '=', 'not_ready')]"/>
+                <filter string="Tally Failed" name="tally_failed"
+                        domain="[('tally_sync_status', '=', 'failed')]"/>
+                <filter string="Tally Syncing" name="tally_syncing"
+                        domain="[('tally_sync_status', '=', 'syncing')]"/>
+                <filter string="Tally Sync Unknown" name="tally_sync_unknown"
+                        domain="[('tally_sync_status', '=', 'sync_unknown')]"/>
+                <filter string="Tally Retrying" name="tally_retrying"
+                        domain="[('tally_sync_status', '=', 'retrying')]"/>
+                <filter string="Tally Synced" name="tally_synced"
+                        domain="[('tally_sync_status', '=', 'synced')]"/>
+                <filter string="Tally Rejected" name="tally_rejected"
+                        domain="[('tally_sync_status', '=', 'rejected')]"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

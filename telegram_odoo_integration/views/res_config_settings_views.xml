@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_telegram" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.telegram</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Telegram" string="Telegram" name="telegram">
+                    <block title="Telegram Bot Configuration">
+                        <setting string="Bot Token"
+                                 help="Token obtained from @BotFather. Recommended: set the TELEGRAM_BOT_TOKEN environment variable instead (it takes precedence).">
+                            <field name="telegram_bot_token" password="True"/>
+                        </setting>
+                        <setting string="Allowed Chat ID"
+                                 help="Only this chat id can place orders. Find your chat id by messaging @userinfobot on Telegram.">
+                            <field name="telegram_allowed_chat_id"/>
+                        </setting>
+                    </block>
+                    <block title="AI Parser Configuration">
+                        <setting string="AI Parser URL"
+                                 help="Base URL of the independent AI Parser application (e.g. https://ai-parser.example.com).">
+                            <field name="ai_parser_url"/>
+                        </setting>
+                        <setting string="AI Parser API Key"
+                                 help="API key for the AI Parser. Do NOT use the Telegram bot token.">
+                            <field name="ai_parser_api_key" password="True"/>
+                        </setting>
+                    </block>
+                    <block title="Limits &amp; Timeouts">
+                        <setting string="Max File Size (MB)"
+                                 help="Maximum allowed file size for Telegram attachments.">
+                            <field name="max_file_size_mb"/>
+                        </setting>
+                        <setting string="Session Timeout (minutes)"
+                                 help="Idle order sessions expire after this period.">
+                            <field name="session_timeout_minutes"/>
+                        </setting>
+                        <setting string="Additional Allowed Chat IDs"
+                                 help="Comma separated list for multi-user setups.">
+                            <field name="telegram_allowed_chat_ids"/>
+                        </setting>
+                        <setting string="Rate Limit (per minute)"
+                                 help="Maximum Telegram messages per user per minute.">
+                            <field name="rate_limit_per_minute"/>
+                        </setting>
+                        <setting string="Max Concurrent Jobs per User"
+                                 help="Maximum concurrent processing jobs per Telegram user.">
+                            <field name="max_concurrent_jobs"/>
+                        </setting>
+                        <setting string="Parser Poll Interval (minutes)"
+                                 help="Interval for polling AI Parser for pending jobs.">
+                            <field name="poll_interval_minutes"/>
+                        </setting>
+                        <setting string="Job Status Timeout (minutes)"
+                                 help="Timeout for job status polling before marking as failed.">
+                            <field name="job_status_timeout_minutes"/>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

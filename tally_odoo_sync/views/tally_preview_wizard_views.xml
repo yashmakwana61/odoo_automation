@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_tally_preview_wizard_form" model="ir.ui.view">
+        <field name="name">tally.invoice.preview.wizard.form</field>
+        <field name="model">tally.invoice.preview.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Tally Invoice Preview">
+                <header>
+                    <button string="Close" class="btn-primary" special="cancel"/>
+                </header>
+                <sheet>
+                    <div class="alert alert-success" role="alert" invisible="readiness_status != 'ready'">
+                        <strong>STATUS: READY</strong> — Invoice is ready for Tally sync.
+                    </div>
+                    <div class="alert alert-danger" role="alert" invisible="readiness_status != 'not_ready'">
+                        <strong>STATUS: NOT READY</strong> — Fix the missing items below before syncing.
+                    </div>
+                    <group string="Tally Invoice Preview">
+                        <group>
+                            <field name="readiness_status"/>
+                            <field name="invoice_name" readonly="1"/>
+                            <field name="invoice_date" readonly="1"/>
+                            <field name="company_name" readonly="1"/>
+                            <field name="customer_name" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="subtotal" readonly="1"/>
+                            <field name="total_tax" readonly="1"/>
+                            <field name="grand_total" readonly="1"/>
+                            <field name="amount_words" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Invoice">
+                        <field name="invoice_id" readonly="1" invisible="1"/>
+                        <field name="is_ready" invisible="1"/>
+                        <field name="has_payload" invisible="1"/>
+                        <field name="has_xml" invisible="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Products" name="products">
+                            <field name="products_html" nolabel="1" readonly="1"/>
+                        </page>
+                        <page string="Tax Summary" name="tax">
+                            <field name="tax_html" nolabel="1" readonly="1"/>
+                        </page>
+                        <page string="HSN Summary" name="hsn">
+                            <field name="hsn_html" nolabel="1" readonly="1"/>
+                        </page>
+                        <page string="Validation" name="validation">
+                            <field name="validation_html" nolabel="1" readonly="1"/>
+                            <group string="Summary" invisible="is_ready">
+                                <field name="error_message" nolabel="1" readonly="1"/>
+                            </group>
+                            <field name="validation_summary" readonly="1" invisible="1"/>
+                        </page>
+                        <page string="Payload" name="payload">
+                            <field name="payload_json" nolabel="1" readonly="1" widget="ace" options="{'mode': 'json'}"/>
+                            <div invisible="has_payload">
+                                <p><i>No payload generated — invoice not ready.</i></p>
+                            </div>
+                        </page>
+                        <page string="XML" name="xml">
+                            <field name="xml_content" nolabel="1" readonly="1" widget="ace" options="{'mode': 'xml'}"/>
+                            <div invisible="has_xml">
+                                <p><i>No XML generated — invoice not ready.</i></p>
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+                <footer>
+                    <button string="Close" class="btn-primary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tally_preview_wizard" model="ir.actions.act_window">
+        <field name="name">Tally Invoice Preview</field>
+        <field name="res_model">tally.invoice.preview.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

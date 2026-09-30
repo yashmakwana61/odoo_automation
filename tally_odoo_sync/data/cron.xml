@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Retry failed/pending invoices every 15 minutes -->
+        <record id="cron_tally_retry_failed" model="ir.cron">
+            <field name="name">Tally Sync: Retry Failed Invoices</field>
+            <field name="model_id" ref="model_account_move"/>
+            <field name="state">code</field>
+            <field name="code">model._tally_cron_retry_failed()</field>
+            <field name="interval_number">15</field>
+            <field name="interval_type">minutes</field>
+            <field name="active">True</field>
+        </record>
+    </data>
+</odoo>

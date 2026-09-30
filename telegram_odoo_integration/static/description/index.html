@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Telegram Odoo Integration</title>
+    <style>
+        body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+               max-width: 720px; margin: 40px auto; padding: 0 20px;
+               color: #2c3e50; line-height: 1.6; }
+        h1 { border-bottom: 2px solid #1fb0d9; padding-bottom: 8px; }
+        code { background: #f0f0f0; padding: 1px 5px; border-radius: 3px; }
+        pre { background: #f7f7f7; padding: 12px; border-radius: 6px; overflow-x: auto; }
+        .feature { margin: 8px 0; }
+    </style>
+</head>
+<body>
+    <h1>Telegram Odoo Integration</h1>
+    <p>Create <strong>Sales Orders</strong> automatically from Telegram bot
+       messages.</p>
+
+    <h2>Features</h2>
+    <div class="feature">✔ Public JSON webhook <code>POST /telegram/webhook</code></div>
+    <div class="feature">✔ Configurable bot token and allowed chat id (Settings &gt; Telegram)</div>
+    <div class="feature">✔ Automatic customer &amp; product creation</div>
+    <div class="feature">✔ Multiple products per message</div>
+    <div class="feature">✔ Telegram chat history stored in Odoo</div>
+    <div class="feature">✔ Reply to users through the Telegram Bot API</div>
+
+    <h2>Usage</h2>
+    <p>Send an order to the bot in this format:</p>
+    <pre>Order: Laptop Qty:2 Price:50000</pre>
+    <p>Multiple products (comma separated):</p>
+    <pre>Order: Laptop Qty:1 Price:50000, Mouse Qty:2 Price:300</pre>
+    <p>The bot replies <code>Order created successfully: SO00001</code>.</p>
+
+    <h2>Compatibility</h2>
+    <p>Odoo 16 / 17 Community Edition (also runs on newer versions).</p>
+</body>
+</html>

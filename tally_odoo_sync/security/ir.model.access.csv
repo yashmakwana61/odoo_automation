@@ -1,0 +1,15 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_tally_mapping_user,tally.mapping.user,model_tally_mapping,account.group_account_invoice,1,0,0,0
+access_tally_mapping_manager,tally.mapping.manager,model_tally_mapping,account.group_account_manager,1,1,1,1
+access_tally_sync_log_user,tally.sync.log.user,model_tally_sync_log,account.group_account_invoice,1,0,0,0
+access_tally_sync_log_manager,tally.sync.log.manager,model_tally_sync_log,account.group_account_manager,1,1,1,0
+access_tally_preview_wizard_user,tally.invoice.preview.wizard.user,model_tally_invoice_preview_wizard,account.group_account_invoice,1,1,1,1
+access_tally_preview_wizard_manager,tally.invoice.preview.wizard.manager,model_tally_invoice_preview_wizard,account.group_account_manager,1,1,1,1
+access_tally_import_batch_user,tally.import.batch.user,model_tally_import_batch,account.group_account_invoice,1,0,0,0
+access_tally_import_batch_manager,tally.import.batch.manager,model_tally_import_batch,account.group_account_manager,1,1,1,1
+access_tally_import_record_user,tally.import.record.user,model_tally_import_record,account.group_account_invoice,1,0,0,0
+access_tally_import_record_manager,tally.import.record.manager,model_tally_import_record,account.group_account_manager,1,1,1,1
+access_tally_group_mapping_user,tally.group.mapping.user,model_tally_group_mapping,account.group_account_invoice,1,0,0,0
+access_tally_group_mapping_manager,tally.group.mapping.manager,model_tally_group_mapping,account.group_account_manager,1,1,1,1
+access_tally_import_wizard_user,tally.import.wizard.user,model_tally_import_wizard,account.group_account_invoice,1,1,1,1
+access_tally_import_wizard_manager,tally.import.wizard.manager,model_tally_import_wizard,account.group_account_manager,1,1,1,1

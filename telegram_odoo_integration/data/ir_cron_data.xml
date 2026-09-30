@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="ir_cron_poll_ai_parser" model="ir.cron">
+        <field name="name">Telegram: Poll AI Parser Status</field>
+        <field name="model_id" ref="model_telegram_order_session"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_poll_ai_parser()</field>
+        <field name="interval_number">5</field>
+        <field name="interval_type">minutes</field>
+        <field name="active">True</field>
+    </record>
+</odoo>

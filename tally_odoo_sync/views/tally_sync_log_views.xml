@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================================================================
+         Tally Sync Log: Views + Action (must come before menus)
+         ================================================================ -->
+    <record id="view_tally_sync_log_tree" model="ir.ui.view">
+        <field name="name">tally.sync.log.tree</field>
+        <field name="model">tally.sync.log</field>
+        <field name="arch" type="xml">
+            <list decoration-success="sync_status == 'success'"
+                  decoration-danger="sync_status in ('failed', 'rejected', 'validation_failed')"
+                  decoration-warning="sync_status in ('not_ready', 'network_error', 'timeout')">
+                <field name="invoice_number"/>
+                <field name="company_id" optional="hide" groups="base.group_multi_company"/>
+                <field name="sync_status"/>
+                <field name="sync_timestamp"/>
+                <field name="tally_voucher_id"/>
+                <field name="error_code" optional="hide"/>
+                <field name="error_message" optional="hide"/>
+                <field name="sync_attempt_id" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_tally_sync_log_form" model="ir.ui.view">
+        <field name="name">tally.sync.log.form</field>
+        <field name="model">tally.sync.log</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <field name="invoice_id" widget="statinfo" string="Invoice"/>
+                    </div>
+                    <group>
+                        <group string="Sync Info">
+                            <field name="invoice_number"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="sync_status"/>
+                            <field name="sync_timestamp"/>
+                            <field name="sync_attempt_id"/>
+                        </group>
+                        <group string="Tally Response">
+                            <field name="tally_voucher_id"/>
+                            <field name="tally_voucher_guid"/>
+                            <field name="error_code"/>
+                        </group>
+                    </group>
+                    <group string="Error" invisible="not error_message">
+                        <field name="error_message" nolabel="1" readonly="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Tally Response" name="response">
+                            <field name="tally_response_raw" readonly="1" nolabel="1"
+                                   placeholder="Raw Tally XML response..."/>
+                        </page>
+                        <page string="Payload" name="payload">
+                            <field name="payload_json" readonly="1" nolabel="1"
+                                   placeholder="JSON payload sent to Tally..."/>
+                        </page>
+                        <page string="Validation" name="validation">
+                            <field name="validation_json" readonly="1" nolabel="1"
+                                   placeholder="Validation results..."/>
+                        </page>
+                        <page string="Hashes" name="hashes">
+                            <group>
+                                <field name="request_hash" readonly="1"/>
+                                <field name="xml_hash" readonly="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_tally_sync_log_search" model="ir.ui.view">
+        <field name="name">tally.sync.log.search</field>
+        <field name="model">tally.sync.log</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="invoice_number"/>
+                <field name="tally_voucher_id"/>
+                <separator/>
+                <filter string="Success" name="success"
+                        domain="[('sync_status', '=', 'success')]"/>
+                <filter string="Failed" name="failed"
+                        domain="[('sync_status', '=', 'failed')]"/>
+                <filter string="Not Ready" name="not_ready"
+                        domain="[('sync_status', '=', 'not_ready')]"/>
+                <separator/>
+                <filter string="Status" name="group_status"
+                        context="{'group_by': 'sync_status'}"/>
+                <filter string="Date" name="group_date"
+                        context="{'group_by': 'sync_timestamp:month'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_tally_sync_log" model="ir.actions.act_window">
+        <field name="name">Tally Sync Log</field>
+        <field name="res_model">tally.sync.log</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_tally_sync_log_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No synchronization records yet
+            </p>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         Tally Sync Log: Menu (after views and action)
+         ================================================================ -->
+    <menuitem id="menu_tally_sync_log"
+              name="Sync History"
+              parent="menu_tally_sync_root"
+              action="action_tally_sync_log"
+              sequence="20"/>
+</odoo>

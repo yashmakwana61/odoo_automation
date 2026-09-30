@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_tally" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.tally</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Tally Sync" string="Tally Sync" name="tally_odoo_sync"
+                     groups="account.group_account_manager">
+                    <block title="Tally Integration">
+                        <setting string="Tally Sync"
+                                 help="Push posted customer invoices to Tally as GST-compliant Sales Vouchers.">
+                            <div class="content-group">
+                                <div class="row">
+                                    <label for="tally_sync_enabled" string="Enable Tally Sync" class="col-4"/>
+                                    <field name="tally_sync_enabled"/>
+                                </div>
+                                <div class="row">
+                                    <label for="tally_sync_on_post" string="Sync Automatically on Post" class="col-4"/>
+                                    <field name="tally_sync_on_post"/>
+                                </div>
+                                <div class="row">
+                                    <label for="tally_sync_mode" string="Sync Mode" class="col-4"/>
+                                    <field name="tally_sync_mode"/>
+                                </div>
+                                <div class="row">
+                                    <label for="tally_retry_max_attempts" string="Max Retry Attempts" class="col-4"/>
+                                    <field name="tally_retry_max_attempts"/>
+                                </div>
+                                <div class="row">
+                                    <label for="tally_connector_type" string="Connector Type" class="col-4"/>
+                                    <field name="tally_connector_type"/>
+                                </div>
+                            </div>
+                        </setting>
+                        <setting string="Tally HTTP API"
+                                 help="Tally must be running with its HTTP server enabled (default port 9000).">
+                            <div class="content-group">
+                                <div class="row">
+                                    <label for="tally_server_url" string="Server URL" class="col-4"/>
+                                    <field name="tally_server_url"/>
+                                </div>
+                                <div class="row">
+                                    <label for="tally_company_name" string="Tally Company Name" class="col-4"/>
+                                    <field name="tally_company_name" placeholder="Defaults to Odoo company name"/>
+                                </div>
+                                <div class="row">
+                                    <label for="tally_username" string="Username" class="col-4"/>
+                                    <field name="tally_username"/>
+                                </div>
+                                <div class="row">
+                                    <label for="tally_password" string="Password" class="col-4"/>
+                                    <field name="tally_password" password="True"/>
+                                </div>
+                                <div class="row">
+                                    <label for="tally_timeout" string="Timeout (seconds)" class="col-4"/>
+                                    <field name="tally_timeout"/>
+                                </div>
+                                <div class="row">
+                                    <label for="tally_verify_ssl" string="Verify SSL Certificate" class="col-4"/>
+                                    <field name="tally_verify_ssl"/>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4"><span class="o_form_label">Test Connection</span></div>
+                                    <button name="action_test_tally_connection" type="object" string="Test Tally Configuration" class="btn-primary" icon="fa-plug"/>
+                                </div>
+                            </div>
+                        </setting>
+                        <setting string="Ledgers"
+                                 help="Ledger used for the sales leg, and whether missing ledgers should be created by Tally.">
+                            <div class="content-group">
+                                <div class="row">
+                                    <label for="tally_sales_ledger" string="Sales Ledger Name" class="col-4"/>
+                                    <field name="tally_sales_ledger"/>
+                                </div>
+                                <div class="row">
+                                    <label for="tally_auto_create_ledgers" string="Auto-create Missing Ledgers" class="col-4"/>
+                                    <field name="tally_auto_create_ledgers"/>
+                                </div>
+                                <div class="row">
+                                    <label for="tally_party_ledger_parent" string="Party Ledger Parent Group" class="col-4"/>
+                                    <field name="tally_party_ledger_parent"/>
+                                </div>
+                                <div class="row">
+                                    <label for="tally_sales_ledger_parent" string="Sales Ledger Parent Group" class="col-4"/>
+                                    <field name="tally_sales_ledger_parent"/>
+                                </div>
+                                <div class="row">
+                                    <label for="tally_tax_ledger_parent" string="Tax Ledger Parent Group" class="col-4"/>
+                                    <field name="tally_tax_ledger_parent"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                    <block title="Invoice Display">
+                        <setting string="Invoice Footer"
+                                 help="Declaration text and authorised signatory shown on Tally invoices.">
+                            <div class="content-group">
+                                <div class="row">
+                                    <label for="tally_declaration" string="Declaration" class="col-4"/>
+                                    <field name="tally_declaration" placeholder="Subject to jurisdiction"/>
+                                </div>
+                                <div class="row">
+                                    <label for="tally_signatory" string="Authorised Signatory" class="col-4"/>
+                                    <field name="tally_signatory" placeholder="Defaults to company name"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================================================================
+         Tally Mapping: Views + Action (must come before menus)
+         ================================================================ -->
+    <record id="view_tally_mapping_tree" model="ir.ui.view">
+        <field name="name">tally.mapping.tree</field>
+        <field name="model">tally.mapping</field>
+        <field name="arch" type="xml">
+            <list editable="bottom"
+                  decoration-info="mapping_type == 'customer'"
+                  decoration-warning="mapping_type == 'product'"
+                  decoration-danger="mapping_type == 'tax'"
+                  decoration-success="mapping_type == 'uom'">
+                <field name="mapping_type"/>
+                <field name="odoo_partner_id" optional="hide"
+                       required="mapping_type == 'customer'"/>
+                <field name="odoo_product_id" optional="hide"
+                       required="mapping_type == 'product'"/>
+                <field name="odoo_tax_id" optional="hide"
+                       required="mapping_type == 'tax'"/>
+                <field name="odoo_uom_id" optional="hide"
+                       required="mapping_type == 'uom'"/>
+                <field name="tally_name"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="active" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_tally_mapping_form" model="ir.ui.view">
+        <field name="name">tally.mapping.form</field>
+        <field name="model">tally.mapping</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="display_name" placeholder="Mapping name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Mapping">
+                            <field name="mapping_type"/>
+                            <field name="odoo_partner_id"
+                                   invisible="mapping_type != 'customer'"
+                                   required="mapping_type == 'customer'"/>
+                            <field name="odoo_product_id"
+                                   invisible="mapping_type != 'product'"
+                                   required="mapping_type == 'product'"/>
+                            <field name="odoo_tax_id"
+                                   invisible="mapping_type != 'tax'"
+                                   required="mapping_type == 'tax'"/>
+                            <field name="odoo_uom_id"
+                                   invisible="mapping_type != 'uom'"
+                                   required="mapping_type == 'uom'"/>
+                        </group>
+                        <group string="Tally Target">
+                            <field name="tally_name"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="sequence" invisible="1"/>
+                            <field name="active"/>
+                        </group>
+                    </group>
+                    <group string="Notes">
+                        <field name="notes" nolabel="1" placeholder="Optional notes about this mapping..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_tally_mapping_search" model="ir.ui.view">
+        <field name="name">tally.mapping.search</field>
+        <field name="model">tally.mapping</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="tally_name"/>
+                <separator/>
+                <filter string="Customers" name="customers"
+                        domain="[('mapping_type', '=', 'customer')]"/>
+                <filter string="Products" name="products"
+                        domain="[('mapping_type', '=', 'product')]"/>
+                <filter string="Taxes" name="taxes"
+                        domain="[('mapping_type', '=', 'tax')]"/>
+                <filter string="UOMs" name="uoms"
+                        domain="[('mapping_type', '=', 'uom')]"/>
+                <separator/>
+                <filter string="Mapping Type" name="group_type"
+                        context="{'group_by': 'mapping_type'}"/>
+                <filter string="Company" name="group_company"
+                        context="{'group_by': 'company_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_tally_mapping" model="ir.actions.act_window">
+        <field name="name">Tally Entity Mappings</field>
+        <field name="res_model">tally.mapping</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_tally_mapping_search"/>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add your first Tally mapping
+            </p>
+            <p>
+                Map Odoo customers, products, taxes, and units of measure
+                to their Tally equivalents.
+            </p>
+        </field>
+    </record>
+
+    <!-- ================================================================
+         Tally Mapping: Menu Items (after views and action)
+         ================================================================ -->
+    <menuitem id="menu_tally_sync_root"
+              name="Tally Sync"
+              parent="account.menu_finance"
+              sequence="90"
+              groups="account.group_account_manager"/>
+
+    <menuitem id="menu_tally_mapping"
+              name="Entity Mappings"
+              parent="menu_tally_sync_root"
+              action="action_tally_mapping"
+              sequence="10"/>
+</odoo>

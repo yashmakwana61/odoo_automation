@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================================ -->
+    <!-- telegram.order.session                                       -->
+    <!-- ============================================================ -->
+    <record id="telegram_order_session_tree" model="ir.ui.view">
+        <field name="name">telegram.order.session.tree</field>
+        <field name="model">telegram.order.session</field>
+        <field name="arch" type="xml">
+            <list string="Order Sessions">
+                <field name="create_date"/>
+                <field name="session_id" string="Session"/>
+                <field name="parser_job_id" string="Job ID"/>
+                <field name="telegram_username"/>
+                <field name="staff_id"/>
+                <field name="state"/>
+                <field name="ai_parser_status"/>
+                <field name="sale_order_name" string="Sales Order"/>
+                <field name="message_count" string="Msgs"/>
+                <field name="attachment_count" string="Files"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="telegram_order_session_form" model="ir.ui.view">
+        <field name="name">telegram.order.session.form</field>
+        <field name="model">telegram.order.session</field>
+        <field name="arch" type="xml">
+            <form string="Order Session">
+                <header>
+                    <button name="action_submit" type="object"
+                            string="Submit" class="oe_highlight"
+                            invisible="state != 'collecting'"/>
+                    <button name="action_cancel" type="object"
+                            string="Cancel"
+                            invisible="state in ('completed', 'cancelled', 'expired')"/>
+                    <button name="action_retry" type="object"
+                            string="Retry" class="oe_highlight"
+                            invisible="state not in ('failed', 'incomplete')"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="session_id"/>
+                            <field name="staff_id"/>
+                            <field name="chat_id"/>
+                            <field name="telegram_username"/>
+                        </group>
+                        <group>
+                            <field name="request_id"/>
+                            <field name="parser_job_id"/>
+                            <field name="idempotency_key"/>
+                            <field name="ai_parser_status"/>
+                            <field name="sale_order_id" string="Sales Order"
+                                   readonly="1"/>
+                            <field name="incomplete_fields"
+                                   invisible="not incomplete_fields"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Messages" name="messages">
+                            <field name="message_ids" readonly="1">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="message_text"/>
+                                    <field name="telegram_message_id"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Attachments" name="attachments">
+                            <field name="attachment_ids" readonly="1">
+                                <list>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="filename"/>
+                                    <field name="mime_type"/>
+                                    <field name="file_size"/>
+                                    <field name="file_hash"/>
+                                    <field name="is_served"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="AI Parser Response" name="response">
+                            <field name="ai_parser_response" readonly="1"
+                                   placeholder="No response yet"/>
+                            <field name="error_message"
+                                   invisible="not error_message"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="telegram_order_session_search" model="ir.ui.view">
+        <field name="name">telegram.order.session.search</field>
+        <field name="model">telegram.order.session</field>
+        <field name="arch" type="xml">
+            <search string="Order Sessions">
+                <field name="session_id"/>
+                <field name="telegram_username"/>
+                <field name="staff_id"/>
+                <field name="sale_order_name"/>
+                <filter name="state_collecting" string="Collecting"
+                        domain="[('state', '=', 'collecting')]"/>
+                <filter name="state_processing" string="Processing"
+                        domain="[('state', 'in', ('submitted', 'processing'))]"/>
+                <filter name="state_completed" string="Completed"
+                        domain="[('state', '=', 'completed')]"/>
+                <filter name="state_incomplete" string="Incomplete"
+                        domain="[('state', '=', 'incomplete')]"/>
+                <filter name="state_failed" string="Failed"
+                        domain="[('state', '=', 'failed')]"/>
+                <separator/>
+                <filter name="group_state" string="Status"
+                        context="{'group_by': 'state'}"/>
+                <filter name="group_staff" string="Staff"
+                        context="{'group_by': 'staff_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_telegram_order_sessions" model="ir.actions.act_window">
+        <field name="name">Order Sessions</field>
+        <field name="res_model">telegram.order.session</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_state_collecting': 1}</field>
+    </record>
+
+    <menuitem id="menu_telegram_order_sessions"
+              name="Order Sessions"
+              parent="sale.sale_order_menu"
+              action="action_telegram_order_sessions"
+              sequence="90"
+              groups="sales_team.group_sale_salesman"/>
+</odoo>

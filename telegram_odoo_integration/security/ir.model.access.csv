@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_telegram_message_internal_user,telegram.message.internal.user,model_telegram_message,base.group_user,1,0,0,0
+access_telegram_message_sale_manager,telegram.message.sale.manager,model_telegram_message,sales_team.group_sale_manager,1,1,1,1
+access_telegram_order_session_internal_user,telegram.order.session.internal.user,model_telegram_order_session,base.group_user,1,0,0,0
+access_telegram_order_session_sale_manager,telegram.order.session.sale.manager,model_telegram_order_session,sales_team.group_sale_manager,1,1,1,1
+access_telegram_session_message_internal_user,telegram.session.message.internal.user,model_telegram_session_message,base.group_user,1,0,0,0
+access_telegram_session_message_sale_manager,telegram.session.message.sale.manager,model_telegram_session_message,sales_team.group_sale_manager,1,1,1,1
+access_telegram_session_attachment_internal_user,telegram.session.attachment.internal.user,model_telegram_session_attachment,base.group_user,1,0,0,0
+access_telegram_session_attachment_sale_manager,telegram.session.attachment.sale.manager,model_telegram_session_attachment,sales_team.group_sale_manager,1,1,1,1

@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ================= Import Batch ================= -->
+    <record id="view_tally_import_batch_list" model="ir.ui.view">
+        <field name="name">tally.import.batch.list</field>
+        <field name="model">tally.import.batch</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'completed'"
+                  decoration-danger="state == 'failed'"
+                  decoration-info="state == 'ready'"
+                  decoration-warning="state in ('analysing','importing','matching','classifying')">
+                <field name="name"/>
+                <field name="source_filename"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="state"/>
+                <field name="total_records"/>
+                <field name="customer_count" optional="hide"/>
+                <field name="vendor_count" optional="hide"/>
+                <field name="created_count"/>
+                <field name="updated_count"/>
+                <field name="error_count"/>
+                <field name="review_count"/>
+                <field name="import_date"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_tally_import_batch_form" model="ir.ui.view">
+        <field name="name">tally.import.batch.form</field>
+        <field name="model">tally.import.batch</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_analyse" type="object" string="Analyse"
+                            class="btn-primary" invisible="state in ('analysing','classifying','matching','importing')"/>
+                    <button name="action_classify" type="object" string="Classify"
+                            invisible="state != 'analysed'"/>
+                    <button name="action_match" type="object" string="Match"
+                            invisible="state not in ('matching','classifying','analysed')"/>
+                    <button name="action_dry_run" type="object" string="Dry Run"
+                            invisible="state != 'ready'"/>
+                    <button name="action_import" type="object" string="Import"
+                            class="btn-primary" invisible="state != 'ready'"
+                            confirm="Import master data into Odoo? Dry-run first if unsure."/>
+                    <button name="action_retry_failed" type="object" string="Retry Failed"
+                            invisible="state != 'failed'"/>
+                    <button name="action_verify_mappings" type="object" string="Verify"
+                            invisible="state != 'completed'"/>
+                    <button name="action_cancel" type="object" string="Cancel"
+                            invisible="state in ('completed','cancelled')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,analysed,ready,importing,completed,failed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1></div>
+                    <group>
+                        <group string="Source">
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="source_filename"/>
+                            <field name="source_file" filename="source_filename"/>
+                            <field name="source_hash" readonly="1"/>
+                            <field name="source_size" readonly="1"/>
+                            <field name="encoding_used" readonly="1"/>
+                            <field name="dry_run"/>
+                        </group>
+                        <group string="Run">
+                            <field name="import_date" readonly="1"/>
+                            <field name="started_at" readonly="1"/>
+                            <field name="completed_at" readonly="1"/>
+                            <field name="created_by" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Source Counts">
+                        <field name="total_records" readonly="1"/>
+                        <field name="ledger_count" readonly="1"/>
+                        <field name="group_count" readonly="1"/>
+                        <field name="currency_count" readonly="1"/>
+                        <field name="stock_item_count" readonly="1"/>
+                        <field name="other_count" readonly="1"/>
+                    </group>
+                    <group string="Classification">
+                        <field name="customer_count" readonly="1"/>
+                        <field name="vendor_count" readonly="1"/>
+                        <field name="account_count" readonly="1"/>
+                        <field name="tax_count" readonly="1"/>
+                        <field name="product_count" readonly="1"/>
+                        <field name="uom_count" readonly="1"/>
+                    </group>
+                    <group string="Results">
+                        <field name="new_count" readonly="1"/>
+                        <field name="matched_count" readonly="1"/>
+                        <field name="created_count" readonly="1"/>
+                        <field name="updated_count" readonly="1"/>
+                        <field name="skipped_count" readonly="1"/>
+                        <field name="review_count" readonly="1"/>
+                        <field name="error_count" readonly="1"/>
+                    </group>
+                    <group string="Products" invisible="has_stock_items">
+                        <field name="product_warning" nolabel="1" readonly="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Records">
+                            <field name="record_ids"/>
+                        </page>
+                        <page string="Run Log">
+                            <field name="log" nolabel="1" readonly="1"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_tally_import_batch_search" model="ir.ui.view">
+        <field name="name">tally.import.batch.search</field>
+        <field name="model">tally.import.batch</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="source_filename"/>
+                <separator/>
+                <filter string="Draft" name="draft" domain="[('state','=','draft')]"/>
+                <filter string="Ready" name="ready" domain="[('state','=','ready')]"/>
+                <filter string="Completed" name="done" domain="[('state','=','completed')]"/>
+                <filter string="Failed" name="failed" domain="[('state','=','failed')]"/>
+                <filter string="Needs Review" name="review" domain="[('review_count','&gt;',0)]"/>
+                <separator/>
+                <filter string="State" name="group_state" context="{'group_by':'state'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_tally_import_batch" model="ir.actions.act_window">
+        <field name="name">Import Batches</field>
+        <field name="res_model">tally.import.batch</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_tally_import_batch_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Upload your first Tally Master.json</p>
+            <p>Analyse, classify, match, dry-run, then import — never direct creation.</p>
+        </field>
+    </record>
+
+    <!-- ================= Import Record ================= -->
+    <record id="view_tally_import_record_list" model="ir.ui.view">
+        <field name="name">tally.import.record.list</field>
+        <field name="model">tally.import.record</field>
+        <field name="arch" type="xml">
+            <list decoration-danger="validation_status == 'error' or import_status == 'failed'"
+                  decoration-warning="match_status in ('possible_duplicate','manual_review') or import_status == 'review'"
+                  decoration-success="import_status in ('imported','updated')">
+                <field name="batch_id"/>
+                <field name="record_type"/>
+                <field name="tally_name"/>
+                <field name="tally_parent" optional="hide"/>
+                <field name="classification"/>
+                <field name="match_status"/>
+                <field name="match_method" optional="hide"/>
+                <field name="validation_status"/>
+                <field name="import_status"/>
+                <field name="odoo_record_ref" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_tally_import_record_form" model="ir.ui.view">
+        <field name="name">tally.import.record.form</field>
+        <field name="model">tally.import.record</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_retry" type="object" string="Retry"
+                            invisible="import_status != 'failed'"/>
+                    <button name="action_skip" type="object" string="Skip"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Tally Source">
+                            <field name="batch_id" readonly="1"/>
+                            <field name="record_type" readonly="1"/>
+                            <field name="tally_name" readonly="1"/>
+                            <field name="tally_guid" readonly="1"/>
+                            <field name="tally_alter_id" readonly="1"/>
+                            <field name="tally_parent" readonly="1"/>
+                            <field name="opening_balance" readonly="1"/>
+                        </group>
+                        <group string="Odoo Resolution">
+                            <field name="classification" readonly="1"/>
+                            <field name="match_status" readonly="1"/>
+                            <field name="match_method" readonly="1"/>
+                            <field name="match_confidence" readonly="1"/>
+                            <field name="odoo_model" readonly="1"/>
+                            <field name="odoo_record_id" readonly="1"/>
+                            <field name="odoo_record_ref" readonly="1"/>
+                            <field name="validation_status" readonly="1"/>
+                            <field name="import_status" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Messages" invisible="not error_message and not warning_message">
+                        <field name="error_message" nolabel="1" readonly="1"/>
+                        <field name="warning_message" nolabel="1" readonly="1"/>
+                    </group>
+                    <group string="Candidates" invisible="not candidate_json">
+                        <field name="candidate_json" nolabel="1" readonly="1"/>
+                    </group>
+                    <group string="Raw Payload">
+                        <field name="raw_payload" nolabel="1" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_tally_import_record_search" model="ir.ui.view">
+        <field name="name">tally.import.record.search</field>
+        <field name="model">tally.import.record</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="tally_name"/>
+                <field name="tally_guid"/>
+                <field name="batch_id"/>
+                <separator/>
+                <filter string="All" name="all"/>
+                <filter string="Errors" name="errors"
+                        domain="[('validation_status','=','error')]"/>
+                <filter string="Warnings" name="warnings"
+                        domain="[('validation_status','=','warning')]"/>
+                <filter string="Manual Review" name="review"
+                        domain="[('match_status','in',('possible_duplicate','manual_review'))]"/>
+                <filter string="Unmatched" name="unmatched"
+                        domain="[('match_status','=','new')]"/>
+                <filter string="Possible Duplicates" name="dups"
+                        domain="[('match_status','=','possible_duplicate')]"/>
+                <filter string="Missing GSTIN" name="no_gstin"
+                        domain="[('warning_message','ilike','Missing GSTIN')]"/>
+                <filter string="Invalid GSTIN" name="bad_gstin"
+                        domain="[('error_message','ilike','Invalid GSTIN')]"/>
+                <filter string="Already Imported" name="imported"
+                        domain="[('import_status','in',('imported','updated'))]"/>
+                <filter string="Failed" name="failed"
+                        domain="[('import_status','=','failed')]"/>
+                <separator/>
+                <filter string="Classification" name="group_class"
+                        context="{'group_by':'classification'}"/>
+                <filter string="Match Status" name="group_match"
+                        context="{'group_by':'match_status'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_tally_import_record" model="ir.actions.act_window">
+        <field name="name">Import Records</field>
+        <field name="res_model">tally.import.record</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_tally_import_record_search"/>
+    </record>
+
+    <!-- ================= Group Mapping ================= -->
+    <record id="view_tally_group_mapping_list" model="ir.ui.view">
+        <field name="name">tally.group.mapping.list</field>
+        <field name="model">tally.group.mapping</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="tally_group_name"/>
+                <field name="pattern"/>
+                <field name="classification"/>
+                <field name="priority"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="active" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_tally_group_mapping_form" model="ir.ui.view">
+        <field name="name">tally.group.mapping.form</field>
+        <field name="model">tally.group.mapping</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="tally_group_name"/>
+                        <field name="pattern"/>
+                        <field name="classification"/>
+                        <field name="odoo_model"/>
+                        <field name="priority"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="active"/>
+                    </group>
+                    <field name="notes" placeholder="Why does this Tally group map here?..."/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_tally_group_mapping_search" model="ir.ui.view">
+        <field name="name">tally.group.mapping.search</field>
+        <field name="model">tally.group.mapping</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="tally_group_name"/>
+                <field name="pattern"/>
+                <field name="classification"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_tally_group_mapping" model="ir.actions.act_window">
+        <field name="name">Group Mapping Rules</field>
+        <field name="res_model">tally.group.mapping</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ================= Wizard ================= -->
+    <record id="view_tally_import_wizard_form" model="ir.ui.view">
+        <field name="name">tally.import.wizard.form</field>
+        <field name="model">tally.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Tally Master Import">
+                <sheet>
+                    <group>
+                        <field name="step" readonly="1" invisible="1"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
+                        <field name="source_filename" invisible="step != 'upload'"/>
+                        <field name="source_file" filename="source_filename" invisible="step != 'upload'"/>
+                        <field name="dry_run"/>
+                        <field name="batch_id" readonly="1" invisible="not batch_id"/>
+                    </group>
+                    <group string="Progress" invisible="not summary_html">
+                        <field name="summary_html" nolabel="1" readonly="1"/>
+                    </group>
+                    <group string="Preview" invisible="not preview_json">
+                        <field name="preview_json" nolabel="1" readonly="1"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_upload_and_analyse" type="object" string="Upload &amp; Analyse"
+                            class="btn-primary" invisible="step != 'upload'"/>
+                    <button name="action_classify" type="object" string="Classify"
+                            invisible="step != 'analyse'"/>
+                    <button name="action_match" type="object" string="Match"
+                            invisible="step != 'classify'"/>
+                    <button name="action_validate_dry_run" type="object" string="Validate &amp; Dry Run"
+                            invisible="step != 'match'"/>
+                    <button name="action_confirm_import" type="object" string="Confirm Import"
+                            class="btn-primary" invisible="step != 'validate'"/>
+                    <button string="Close" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_tally_import_wizard" model="ir.actions.act_window">
+        <field name="name">Import Master Data</field>
+        <field name="res_model">tally.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- ================= Menus (under existing Tally Sync root) ================= -->
+    <menuitem id="menu_tally_master_data" name="Master Data"
+              parent="tally_odoo_sync.menu_tally_sync_root" sequence="30"/>
+    <menuitem id="menu_tally_import_wizard" name="Import Master Data"
+              parent="menu_tally_master_data" action="action_tally_import_wizard" sequence="1"/>
+    <menuitem id="menu_tally_import_batch" name="Import Batches"
+              parent="menu_tally_master_data" action="action_tally_import_batch" sequence="2"/>
+    <menuitem id="menu_tally_import_record" name="Import Records"
+              parent="menu_tally_master_data" action="action_tally_import_record" sequence="3"/>
+    <menuitem id="menu_tally_config" name="Configuration"
+              parent="tally_odoo_sync.menu_tally_sync_root" sequence="40"/>
+    <menuitem id="menu_tally_group_mapping" name="Group Mapping Rules"
+              parent="menu_tally_config" action="action_tally_group_mapping" sequence="1"/>
+</odoo>

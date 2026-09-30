@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Extend mapping form/list with canonical GUID identity (master importer layer) -->
+    <record id="view_tally_mapping_form_guid" model="ir.ui.view">
+        <field name="name">tally.mapping.form.guid</field>
+        <field name="model">tally.mapping</field>
+        <field name="inherit_id" ref="tally_odoo_sync.view_tally_mapping_form"/>
+        <field name="arch" type="xml">
+            <field name="tally_name" position="after">
+                <field name="tally_guid" readonly="0"/>
+                <field name="tally_alter_id"/>
+                <field name="tally_entity_type"/>
+            </field>
+            <field name="notes" position="before">
+                <field name="match_method" readonly="1"/>
+                <field name="confidence" readonly="1"/>
+                <field name="source_batch_id" readonly="1"/>
+                <field name="last_verified_at" readonly="1"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_tally_mapping_tree_guid" model="ir.ui.view">
+        <field name="name">tally.mapping.tree.guid</field>
+        <field name="model">tally.mapping</field>
+        <field name="inherit_id" ref="tally_odoo_sync.view_tally_mapping_tree"/>
+        <field name="arch" type="xml">
+            <field name="tally_name" position="after">
+                <field name="tally_guid" optional="hide"/>
+                <field name="match_method" optional="hide"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_tally_mapping_search_guid" model="ir.ui.view">
+        <field name="name">tally.mapping.search.guid</field>
+        <field name="model">tally.mapping</field>
+        <field name="inherit_id" ref="tally_odoo_sync.view_tally_mapping_search"/>
+        <field name="arch" type="xml">
+            <search position="inside">
+                <field name="tally_guid"/>
+                <filter string="Has GUID" name="has_guid"
+                        domain="[('tally_guid','!=',False)]"/>
+                <filter string="From Master Import" name="from_import"
+                        domain="[('source_batch_id','!=',False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Partner: Tally identity tab -->
+    <record id="view_res_partner_form_tally" model="ir.ui.view">
+        <field name="name">res.partner.form.tally</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='accounting']" position="after">
+                <page string="Tally" name="tally">
+                    <group>
+                        <field name="tally_guid" readonly="0"/>
+                        <field name="tally_alter_id"/>
+                        <field name="tally_parent"/>
+                        <field name="tally_classification"/>
+                        <field name="tally_last_batch_id" readonly="1"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
